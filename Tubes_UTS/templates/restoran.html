@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}Restoran - Food Delivery{% endblock %}
+
+{% block content %}
+	<h2>Restoran</h2>
+	<div class="restoran-list">
+		{% for r in restaurants|default([]) %}
+			<div class="card restoran-item">
+				<h3>{{ r.name }}</h3>
+				<p>{{ r.address }}</p>
+				<a class="btn" href="/menu?restoran_id={{ r.id }}">Lihat Menu</a>
+			</div>
+		{% else %}
+			<p>Tidak ada restoran terdaftar.</p>
+		{% endfor %}
+	</div>
+{% endblock %}

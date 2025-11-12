@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Menu - Food Delivery{% endblock %}
+
+{% block content %}
+	<h2>Menu</h2>
+	<div class="menu-grid" id="menu-grid">
+		{# Example item structure; backend should render items here #}
+		{% for item in items|default([]) %}
+			<div class="menu-item card">
+				<img src="{{ item.image_url or '/static/placeholder.png' }}" alt="{{ item.name }}" />
+				<h3>{{ item.name }}</h3>
+				<p class="price">Rp {{ item.price }}</p>
+				<p class="desc">{{ item.description }}</p>
+				<div class="item-actions">
+					<button class="btn add-to-cart" data-id="{{ item.id }}" data-name="{{ item.name }}" data-price="{{ item.price }}">Tambah</button>
+				</div>
+			</div>
+		{% else %}
+			<p>Tidak ada menu tersedia.</p>
+		{% endfor %}
+	</div>
+{% endblock %}

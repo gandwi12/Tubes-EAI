@@ -1,0 +1,42 @@
+:root{
+	--bg:#f6f7fb; --card:#fff; --accent:#ff6b6b; --muted:#666; --maxwidth:1100px;
+}
+*{box-sizing:border-box}
+body{font-family:Segoe UI, Roboto, Arial, sans-serif;background:var(--bg);margin:0;color:#222}
+.container{max-width:var(--maxwidth);margin:0 auto;padding:1rem}
+.site-header{background:#fff;border-bottom:1px solid #eee}
+.nav-row{display:flex;align-items:center;gap:1rem}
+.brand{font-weight:700;text-decoration:none;color:var(--accent);font-size:1.2rem}
+.main-nav{display:flex;gap:0.75rem;margin-left:1rem}
+.main-nav a{color:#333;text-decoration:none;padding:0.5rem}
+.cart-mini{margin-left:auto;background:#f0f0f0;padding:0.3rem 0.6rem;border-radius:6px}
+.hero{padding:2rem 0;text-align:center}
+.hero h1{margin:0 0 .5rem}
+.hero p{color:var(--muted)}
+.hero-actions .btn{margin:0 .4rem}
+.features{display:flex;gap:1rem;justify-content:center;padding:1rem 0}
+.card{background:var(--card);padding:1rem;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem}
+.menu-item img{width:100%;height:140px;object-fit:cover;border-radius:6px}
+.menu-item h3{margin:.5rem 0}
+.price{color:var(--accent);font-weight:600}
+.btn{display:inline-block;padding:.45rem .7rem;border-radius:6px;border:1px solid #ddd;background:transparent;cursor:pointer}
+.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.small{padding:.25rem .5rem;font-size:.85rem}
+.item-actions{margin-top:.5rem}
+.muted{color:var(--muted)}
+label{display:block;margin:.6rem 0}
+input,textarea,select{width:100%;padding:.5rem;border-radius:6px;border:1px solid #ddd}
+.form-actions{text-align:right;margin-top:.6rem}
+.restoran-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+.cart-row{display:flex;align-items:center;gap:1rem;padding:.6rem 0;border-bottom:1px solid #f0f0f0}
+.cart-name{flex:1}
+.cart-qty{display:flex;align-items:center;gap:.4rem}
+.qty-btn{padding:.2rem .4rem}
+
+@media (max-width:600px){
+	.main-nav{display:none}
+	.nav-row{gap:.5rem}
+	.features{flex-direction:column}
+}
+

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment - Food Delivery{% endblock %}
+
+{% block content %}
+	<h2>Pembayaran</h2>
+	<div class="card">
+		<p>Total: <strong id="payment-total">Rp 0</strong></p>
+		<form id="payment-form">
+			<label>Metode Pembayaran
+				<select name="method" required>
+					<option value="cod">Cash on Delivery</option>
+					<option value="transfer">Transfer Bank</option>
+					<option value="e-wallet">E-Wallet</option>
+				</select>
+			</label>
+			<div class="form-actions">
+				<button class="btn primary" type="submit">Bayar</button>
+			</div>
+		</form>
+	</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Order - Food Delivery{% endblock %}
+
+{% block content %}
+	<h2>Keranjang</h2>
+	<div id="cart-list">
+		<p class="muted">Keranjang kosong.</p>
+	</div>
+
+	<form id="order-form" class="card">
+		<h3>Detail Pengiriman</h3>
+		<label>Nama
+			<input name="name" required />
+		</label>
+		<label>Alamat
+			<input name="address" required />
+		</label>
+		<label>Catatan (opsional)
+			<textarea name="note"></textarea>
+		</label>
+		<div class="form-actions">
+			<button type="submit" class="btn primary">Buat Pesanan</button>
+		</div>
+	</form>
+{% endblock %}

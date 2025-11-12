@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}User - Food Delivery{% endblock %}
+
+{% block content %}
+	<h2>Profil Pengguna</h2>
+	<div class="card user-card">
+		<p>Nama: {{ user.name if user is defined else '-' }}</p>
+		<p>Email: {{ user.email if user is defined else '-' }}</p>
+		<a class="btn" href="/user/edit">Edit Profil</a>
+	</div>
+{% endblock %}

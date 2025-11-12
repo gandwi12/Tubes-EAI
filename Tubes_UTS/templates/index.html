@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Food Delivery{% endblock %}
+
+{% block content %}
+	<section class="hero">
+		<h1>Welcome to FoodDelivery</h1>
+		<p>Pesan makanan favoritmu dari restoran terdekat.</p>
+		<div class="hero-actions">
+			<a class="btn primary" href="/menu">Lihat Menu</a>
+			<a class="btn" href="/restoran">Temukan Restoran</a>
+		</div>
+	</section>
+
+	<section class="features">
+		<div class="card">Cepat & Aman</div>
+		<div class="card">Beragam Pilihan</div>
+		<div class="card">Pembayaran Mudah</div>
+	</section>
+{% endblock %}
