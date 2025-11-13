@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   if(orderForm){
     orderForm.addEventListener('submit', e=>{
       e.preventDefault()
-      if(Cart.items.length===0){ alert('Keranjang kosong!'); return }
+      if(Cart.items.length===0){ Cart.showNotification('Keranjang kosong!', 'info'); return }
       // Simple submit: send POST to /order (backend should accept JSON)
       fetch('/order', {
         method:'POST', headers:{'Content-Type':'application/json'},
@@ -115,13 +115,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
         if(r.ok){
           r.json().then(function(d){ if(d && d.id) localStorage.setItem('fd_order_id', JSON.stringify(d.id)) }).catch(function(){})
           // don't clear cart here — proceed to payment page which reads cart from localStorage
-          alert('Pesanan dibuat');
+          Cart.showNotification('Pesanan dibuat', 'success');
           const pending = { items: Cart.items, subtotal: Cart.totalPrice(), name: orderForm.name.value, address: orderForm.address.value, note: orderForm.note.value, ts: Date.now() }
           localStorage.setItem('fd_pending_order', JSON.stringify(pending))
-          window.location='/payment'
+          setTimeout(()=>{ window.location='/payment' }, 1000)
         }
-        else alert('Gagal membuat pesanan')
-      }).catch(()=>alert('Gagal menghubungi server'))
+        else Cart.showNotification('Gagal membuat pesanan', 'info')
+      }).catch(()=>Cart.showNotification('Gagal menghubungi server', 'info'))
     })
   }
 
@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         localStorage.setItem('fd_transactions', JSON.stringify(txs))
         localStorage.removeItem('fd_pending_order')
         localStorage.removeItem('fd_order_id')
-        Cart.clear(); alert('Pembayaran dicatat. Terima kasih!'); window.location='/'
+        Cart.clear(); Cart.showNotification('Pembayaran dicatat. Terima kasih!', 'success'); setTimeout(()=>{ window.location='/' }, 1200)
       })
     })
   }
