@@ -120,8 +120,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
           localStorage.setItem('fd_pending_order', JSON.stringify(pending))
           setTimeout(()=>{ window.location='/payment' }, 1000)
         }
-        else Cart.showNotification('Gagal membuat pesanan', 'info')
-      }).catch(()=>Cart.showNotification('Gagal menghubungi server', 'info'))
+        else {
+          r.json().then(function(d){
+            Cart.showNotification((d && (d.error || d.message)) || 'Gagal membuat pesanan', 'error')
+          }).catch(function(){
+            Cart.showNotification('Gagal membuat pesanan', 'error')
+          })
+        }
+      }).catch(()=>Cart.showNotification('Gagal menghubungi server', 'error'))
     })
   }
 
@@ -164,7 +170,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
           fetch('/payment', {
             method:'POST', headers:{'Content-Type':'application/json'},
             body: JSON.stringify({order_id: orderId, amount: total, method, status: 'success'})
-          }).catch(()=>{})
+          }).then(function(pr){
+            if(!pr.ok){
+              pr.json().then(function(d){
+                Cart.showNotification((d && (d.error || d.message)) || 'Gagal membuat pembayaran', 'error')
+              }).catch(function(){ Cart.showNotification('Gagal membuat pembayaran', 'error') })
+            }
+          }).catch(function(){ Cart.showNotification('Payment service tidak tersedia', 'error') })
         }
         const history = JSON.parse(localStorage.getItem('fd_order_history')||'[]')
         history.unshift(orderRecord)
