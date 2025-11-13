@@ -7,19 +7,20 @@
   <p style="color: #595959; margin-bottom: 2rem;">Pilih menu favorit dan tambahkan ke keranjang Anda</p>
   
   <div class="menu-grid" id="menu-grid">
-    {# Example item structure; backend should render items here #}
     {% for item in items|default([]) %}
       <div class="menu-item card">
         <div style="position: relative;">
           <img src="{{ item.image_url or '/static/placeholder.png' }}" alt="{{ item.name }}" />
         </div>
-        <h3>{{ item.name }}</h3>
-        <p class="desc">{{ item.description }}</p>
-        <p class="price"><i class="fas fa-rupiah-sign"></i> {{ item.price }}</p>
-        <div class="item-actions">
-          <button class="btn primary add-to-cart" data-id="{{ item.id }}" data-name="{{ item.name }}" data-price="{{ item.price }}">
-            <i class="fas fa-shopping-cart"></i> Pesan Sekarang
-          </button>
+        <div style="padding: 0.5rem; flex-grow: 1; display: flex; flex-direction: column;">
+          <h3 style="margin: 0.5rem 0;">{{ item.name }}</h3>
+          <p class="desc" style="margin: 0.5rem 0; flex-grow: 1;">{{ item.description }}</p>
+          <p class="price" style="margin: 0.5rem 0;"><i class="fas fa-rupiah-sign"></i> {{ item.price }}</p>
+          <div class="item-actions" style="margin-top: auto;">
+            <button class="btn primary add-to-cart" data-id="{{ item.id }}" data-name="{{ item.name }}" data-price="{{ item.price }}" style="width: 100%;">
+              <i class="fas fa-shopping-cart"></i> Pesan Sekarang
+            </button>
+          </div>
         </div>
       </div>
     {% else %}

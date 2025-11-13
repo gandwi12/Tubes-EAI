@@ -1,9 +1,9 @@
 :root{
   --primary: #fa6f3d;
   --primary-dark: #f05a24;
-  --secondary: #52c41a;
+  --secondary: #fa6f3d;
   --accent: #fa6f3d;
-  --success: #52c41a;
+  --success: #fa6f3d;
   --danger: #f5222d;
   --warning: #faad14;
   --bg: #fafafa;
@@ -150,8 +150,8 @@ body {
 }
 
 .features .card:nth-child(1) { border-top: 4px solid var(--primary); }
-.features .card:nth-child(2) { border-top: 4px solid var(--secondary); }
-.features .card:nth-child(3) { border-top: 4px solid var(--success); }
+.features .card:nth-child(2) { border-top: 4px solid var(--primary); }
+.features .card:nth-child(3) { border-top: 4px solid var(--primary); }
 
 /* Cards */
 .card {
@@ -178,11 +178,14 @@ body {
 
 .menu-item {
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .menu-item img {
   width: 100%;
-  height: 160px;
+  height: 180px;
   object-fit: cover;
   border-radius: 8px;
   transition: transform 0.3s ease;
@@ -193,7 +196,7 @@ body {
 }
 
 .menu-item h3 {
-  margin: 1rem 0 0.5rem;
+  margin: 0.5rem 0;
   font-size: 1.1rem;
   color: var(--text-dark);
 }
@@ -472,5 +475,73 @@ p {
   .cart-sub,
   .cart-qty {
     align-self: flex-start;
+  }
+}
+
+/* Notifications */
+.notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  right: auto;
+  background: #fff;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  transform: translateX(-50%) translateY(-120px);
+  transition: transform 0.35s cubic-bezier(.2,.8,.2,1), opacity 0.35s;
+  opacity: 0;
+}
+
+.notification.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.notification-success {
+  border-left: 4px solid #52c41a;
+}
+
+.notification-success .notification-content {
+  color: #1f1f1f;
+}
+
+.notification-success i {
+  color: #52c41a;
+  margin-right: 0.5rem;
+}
+
+.notification-info {
+  border-left: 4px solid #fa6f3d;
+}
+
+.notification-info .notification-content {
+  color: #1f1f1f;
+}
+
+.notification-info i {
+  color: #fa6f3d;
+  margin-right: 0.5rem;
+}
+
+.notification-content {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 600px) {
+  .notification {
+    top: 10px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%) translateY(-120px);
+    width: calc(100% - 20px);
+  }
+
+  .notification.show {
+    transform: translateX(-50%) translateY(0);
   }
 }

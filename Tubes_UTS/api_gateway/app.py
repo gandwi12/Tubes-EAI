@@ -1,15 +1,25 @@
+import os
+os.environ['FLASK_SKIP_DOTENV'] = '1'
+
 from flask import Flask, render_template, request, jsonify
 from datetime import datetime
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config['SECRET_KEY'] = 'dev-secret-key'
 
+# User data storage (in-memory)
+user_storage = {
+    'name': 'John Doe',
+    'email': 'john@example.com',
+    'phone': '08123456789'
+}
+
 # Sample data
 SAMPLE_ITEMS = [
-    {'id': 1, 'name': 'Nasi Goreng', 'price': '25000', 'description': 'Nasi goreng spesial dengan telur', 'image_url': '/static/img/nasi-goreng.jpg'},
-    {'id': 2, 'name': 'Soto Ayam', 'price': '18000', 'description': 'Soto ayam tradisional', 'image_url': '/static/img/soto-ayam.jpg'},
-    {'id': 3, 'name': 'Gado-gado', 'price': '15000', 'description': 'Gado-gado saus kacang', 'image_url': '/static/img/gado-gado.jpg'},
-    {'id': 4, 'name': 'Satay Ayam', 'price': '20000', 'description': 'Sate ayam dengan bumbu kacang', 'image_url': '/static/img/satay.jpg'},
+    {'id': 1, 'name': 'Nasi Goreng', 'price': '25000', 'description': 'Nasi goreng spesial dengan telur', 'image_url': 'https://cdn-brn1.b-cdn.net/v/P/cb1e8c3e20114c7691bb03fa3d85c6ff-s-w1200-q80.jpg'},
+    {'id': 2, 'name': 'Soto Ayam', 'price': '18000', 'description': 'Soto ayam tradisional', 'image_url': 'https://cdn-brn1.b-cdn.net/v/P/8eb6e2a1e6c245888baee1a56cc5e9bc-s-w1200-q80.jpg'},
+    {'id': 3, 'name': 'Gado-gado', 'price': '15000', 'description': 'Gado-gado saus kacang', 'image_url': 'https://cdn-brn1.b-cdn.net/v/P/5c6e8f2a3d4b1e9c7f2a5d8e3c1b4a9f-s-w1200-q80.jpg'},
+    {'id': 4, 'name': 'Satay Ayam', 'price': '20000', 'description': 'Sate ayam dengan bumbu kacang', 'image_url': 'https://cdn-brn1.b-cdn.net/v/P/9f2a3b1c4d5e6f7a8b9c0d1e2f3a4b5c-s-w1200-q80.jpg'},
 ]
 
 SAMPLE_RESTAURANTS = [
@@ -54,9 +64,25 @@ def restoran():
 
 @app.route('/user')
 def user():
-    # In production, fetch user session
-    user_data = {'name': 'John Doe', 'email': 'john@example.com'}
-    return render_template('user.html', user=user_data)
+    # Fetch user data dari storage
+    return render_template('user.html', user=user_storage)
+
+@app.route('/user/edit', methods=['GET', 'POST'])
+def user_edit():
+    global user_storage
+    
+    if request.method == 'POST':
+        data = request.get_json() if request.is_json else request.form
+        # Update user storage
+        user_storage['name'] = data.get('name', user_storage['name'])
+        user_storage['email'] = data.get('email', user_storage['email'])
+        user_storage['phone'] = data.get('phone', user_storage['phone'])
+        
+        print(f"User profile updated: {user_storage}")
+        return jsonify({'status': 'ok', 'message': 'Profil berhasil diperbarui'}), 200
+    
+    # Get current user data from storage
+    return render_template('user_edit.html', user=user_storage)
 
 @app.errorhandler(404)
 def not_found(e):
