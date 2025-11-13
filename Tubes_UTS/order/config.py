@@ -1,8 +1,10 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-
-load_dotenv()
+try:
+    load_dotenv()
+except Exception:
+    pass
 
 BASE_DIR = Path(__file__).resolve().parent
 DEFAULT_DB = f"sqlite:///{BASE_DIR / 'database.db'}"

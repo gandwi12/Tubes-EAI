@@ -53,9 +53,59 @@
     <h3 style="color: #fa6f3d; margin-bottom: 1rem;">
       <i class="fas fa-history"></i> Riwayat Pesanan Terbaru
     </h3>
-    <p style="color: #595959; text-align: center; padding: 1rem;">
-      <i class="fas fa-inbox" style="display: block; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
-      Belum ada pesanan
-    </p>
+    <div id="order-history">
+      <p style="color: #595959; text-align: center; padding: 1rem;">
+        <i class="fas fa-inbox" style="display: block; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+        Belum ada pesanan
+      </p>
+    </div>
   </div>
+  <script>
+    (function(){
+      try{
+        var root = document.getElementById('order-history');
+        if(!root) return;
+
+        function render(h){
+          var date = new Date(h.ts || h.created_at || Date.now());
+          var items = h.items || [];
+          var subtotal = h.subtotal != null ? h.subtotal : (h.total_price || 0);
+          var deliveryFee = h.deliveryFee != null ? h.deliveryFee : 10000;
+          var discount = h.discount != null ? h.discount : (subtotal >= 50000 ? Math.floor(subtotal*0.1) : 0);
+          var total = h.total != null ? h.total : (subtotal + deliveryFee - discount);
+          var method = h.method || 'cod';
+          var itemsHtml = '<ul style="margin:0.5rem 0 0; padding-left:1.2rem;">' +
+            items.map(function(i){ var nm=(i.name||('Item '+(i.id||''))).toString(); return '<li>'+nm+' x'+(i.qty||1)+'</li>'; }).join('') +
+            '</ul>';
+          var html = ''+
+            '<div style="padding:1rem;">'+
+            '<div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;"><span>Waktu</span><strong>'+date.toLocaleString('id-ID')+'</strong></div>'+
+            '<div style="margin-bottom:0.5rem;"><span style="display:inline-block; min-width:120px;">Item</span>'+itemsHtml+'</div>'+
+            '<div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;"><span>Subtotal</span><strong>Rp '+Number(subtotal).toLocaleString('id-ID')+'</strong></div>'+
+            '<div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;"><span>Biaya Pengiriman</span><strong>Rp '+Number(deliveryFee).toLocaleString('id-ID')+'</strong></div>'+
+            '<div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;"><span>Diskon</span><strong style="color:#52c41a">- Rp '+Number(discount).toLocaleString('id-ID')+'</strong></div>'+
+            '<div style="display:flex; justify-content:space-between; font-weight:700; font-size:1.1rem; margin-top:0.5rem;"><span>Total</span><span style="color:#fa6f3d">Rp '+Number(total).toLocaleString('id-ID')+'</span></div>'+
+            '<div style="margin-top:0.8rem; color:#595959;">Metode: <strong>'+String(method).toUpperCase()+'</strong></div>'+
+            '</div>';
+          root.innerHTML = html;
+        }
+
+        fetch('http://127.0.0.1:5003/orders')
+          .then(function(r){ return r.ok ? r.json() : []; })
+          .then(function(arr){
+            if(Array.isArray(arr) && arr.length){
+              arr.sort(function(a,b){ return new Date(b.created_at||0) - new Date(a.created_at||0) || (b.id||0)-(a.id||0); });
+              render(arr[0]);
+            } else {
+              var history = JSON.parse(localStorage.getItem('fd_order_history')||'[]');
+              if(history.length) render(history[0]);
+            }
+          })
+          .catch(function(){
+            var history = JSON.parse(localStorage.getItem('fd_order_history')||'[]');
+            if(history.length) render(history[0]);
+          });
+      }catch(e){}
+    })();
+  </script>
 {% endblock %}

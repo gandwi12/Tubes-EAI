@@ -2,6 +2,8 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from datetime import datetime
 from models import db, Payment
+import os
+os.environ['FLASK_SKIP_DOTENV'] = '1'
 from config import Config
 
 app = Flask(__name__)
@@ -29,6 +31,10 @@ except Exception:
 def list_payments():
     ps = Payment.query.all()
     return jsonify([p.to_dict() for p in ps])
+
+@app.route('/health')
+def health():
+    return jsonify({'status':'ok','service':'payment','time': datetime.utcnow().isoformat()}), 200
 
 
 @app.route('/payment/<int:pid>', methods=['GET'])
