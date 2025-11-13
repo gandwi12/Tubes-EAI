@@ -532,6 +532,19 @@ p {
   font-size: 0.95rem;
 }
 
+.notification-error {
+  border-left: 4px solid #f5222d;
+}
+
+.notification-error .notification-content {
+  color: #1f1f1f;
+}
+
+.notification-error i {
+  color: #f5222d;
+  margin-right: 0.5rem;
+}
+
 @media (max-width: 600px) {
   .notification {
     top: 10px;
