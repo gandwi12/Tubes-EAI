@@ -3,6 +3,8 @@ from flask_cors import CORS
 from datetime import datetime
 import json
 from models import db, Order
+import os
+os.environ['FLASK_SKIP_DOTENV'] = '1'
 from config import Config
 
 app = Flask(__name__)
@@ -32,6 +34,10 @@ except Exception:
 def list_orders():
     orders = Order.query.all()
     return jsonify([o.to_dict() for o in orders])
+
+@app.route('/health')
+def health():
+    return jsonify({'status':'ok','service':'order','time': datetime.utcnow().isoformat()}), 200
 
 
 @app.route('/orders/<int:order_id>', methods=['GET'])

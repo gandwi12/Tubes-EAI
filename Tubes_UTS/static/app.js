@@ -1,6 +1,8 @@
 // Minimal frontend logic for cart and simple interactions
 const Cart = {
   items: [],
+  deliveryFee: 10000,
+  discount(){ const s = this.totalPrice(); return s >= 50000 ? Math.floor(s * 0.1) : 0 },
   add(item) {
     const found = this.items.find(i => i.id == item.id)
     if (found) found.qty += 1
@@ -8,6 +10,7 @@ const Cart = {
     this.save()
     this.renderMini()
     this.renderCartList()
+    this.renderPaymentSummary()
     
     // Show notification
     this.showNotification(`${item.name} ditambahkan ke keranjang!`, 'success')
@@ -34,15 +37,15 @@ const Cart = {
   },
   remove(id) {
     this.items = this.items.filter(i => i.id != id)
-    this.save(); this.renderMini(); this.renderCartList()
+    this.save(); this.renderMini(); this.renderCartList(); this.renderPaymentSummary()
   },
   changeQty(id, delta) {
     const it = this.items.find(i=>i.id==id)
     if(!it) return
     it.qty = Math.max(1, it.qty + delta)
-    this.save(); this.renderMini(); this.renderCartList()
+    this.save(); this.renderMini(); this.renderCartList(); this.renderPaymentSummary()
   },
-  clear() { this.items = []; this.save(); this.renderMini(); this.renderCartList() },
+  clear() { this.items = []; this.save(); this.renderMini(); this.renderCartList(); this.renderPaymentSummary() },
   save() { localStorage.setItem('fd_cart', JSON.stringify(this.items)) },
   load() { this.items = JSON.parse(localStorage.getItem('fd_cart')||'[]') },
   totalCount(){ return this.items.reduce((s,i)=>s+i.qty,0) },
@@ -72,22 +75,23 @@ const Cart = {
     el.querySelectorAll('.qty-dec').forEach(b=>b.addEventListener('click',e=>{Cart.changeQty(e.target.dataset.id,-1)}))
     el.querySelectorAll('.qty-inc').forEach(b=>b.addEventListener('click',e=>{Cart.changeQty(e.target.dataset.id,1)}))
     el.querySelectorAll('.remove').forEach(b=>b.addEventListener('click',e=>{Cart.remove(e.target.dataset.id)}))
-    // update payment summary if present (subtotal, delivery, discount, total)
+    this.renderPaymentSummary()
+  },
+  renderPaymentSummary(){
     const subtotal = this.totalPrice()
     const subtotalEl = document.getElementById('payment-subtotal')
     if(subtotalEl) subtotalEl.textContent = 'Rp ' + Number(subtotal).toLocaleString('id-ID')
-
-    const deliveryFee = 10000 // fixed delivery fee in demo
+    const deliveryFee = this.deliveryFee
+    const discount = this.discount()
     const discountEl = document.getElementById('payment-discount')
-    if(discountEl) discountEl.textContent = '- Rp ' + Number(0).toLocaleString('id-ID')
-
+    if(discountEl) discountEl.textContent = '- Rp ' + Number(discount).toLocaleString('id-ID')
     const totalEl = document.getElementById('payment-total')
-    if(totalEl) totalEl.textContent = 'Rp ' + Number(subtotal + deliveryFee).toLocaleString('id-ID')
+    if(totalEl) totalEl.textContent = 'Rp ' + Number(subtotal + deliveryFee - discount).toLocaleString('id-ID')
   }
 }
 
 document.addEventListener('DOMContentLoaded', ()=>{
-  Cart.load(); Cart.renderMini(); Cart.renderCartList()
+  Cart.load(); Cart.renderMini(); Cart.renderCartList(); Cart.renderPaymentSummary()
 
   document.querySelectorAll('.add-to-cart').forEach(btn=>{
     btn.addEventListener('click', e=>{
@@ -109,8 +113,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
         body: JSON.stringify({cart:Cart.items, name: orderForm.name.value, address: orderForm.address.value, note: orderForm.note.value})
       }).then(r=>{
         if(r.ok){
+          r.json().then(function(d){ if(d && d.id) localStorage.setItem('fd_order_id', JSON.stringify(d.id)) }).catch(function(){})
           // don't clear cart here — proceed to payment page which reads cart from localStorage
           alert('Pesanan dibuat');
+          const pending = { items: Cart.items, subtotal: Cart.totalPrice(), name: orderForm.name.value, address: orderForm.address.value, note: orderForm.note.value, ts: Date.now() }
+          localStorage.setItem('fd_pending_order', JSON.stringify(pending))
           window.location='/payment'
         }
         else alert('Gagal membuat pesanan')
@@ -122,8 +129,53 @@ document.addEventListener('DOMContentLoaded', ()=>{
   if(paymentForm){
     paymentForm.addEventListener('submit', e=>{
       e.preventDefault()
-      // For demo: simply clear cart and show success
-      Cart.clear(); alert('Pembayaran dicatat. Terima kasih!'); window.location='/'
+      const method = (paymentForm.method && paymentForm.method.value) || 'cod'
+      const subtotal = Cart.totalPrice()
+      const deliveryFee = Cart.deliveryFee
+      const discount = Cart.discount()
+      const total = subtotal + deliveryFee - discount
+      const pending = JSON.parse(localStorage.getItem('fd_pending_order')||'{}')
+      const orderRecord = {
+        items: Cart.items,
+        subtotal,
+        deliveryFee,
+        discount,
+        total,
+        method,
+        name: pending.name || '',
+        address: pending.address || '',
+        note: pending.note || '',
+        ts: Date.now()
+      }
+      const payloadItems = Cart.items.map(i=>({id:i.id, name:i.name, qty:i.qty, price: i.price}))
+      const ensureOrder = (function(){
+        const existingId = JSON.parse(localStorage.getItem('fd_order_id')||'null')
+        if(existingId) return Promise.resolve({id: existingId})
+        return fetch('/order', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({items: payloadItems})
+        }).then(r=> r.ok ? r.json() : null).catch(()=>null)
+      })()
+      ensureOrder.then(data=>{
+        const orderId = data && data.id
+        if(orderId){
+          orderRecord.order_id = orderId
+          localStorage.setItem('fd_order_id', JSON.stringify(orderId))
+          fetch('/payment', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({order_id: orderId, amount: total, method, status: 'success'})
+          }).catch(()=>{})
+        }
+        const history = JSON.parse(localStorage.getItem('fd_order_history')||'[]')
+        history.unshift(orderRecord)
+        localStorage.setItem('fd_order_history', JSON.stringify(history))
+        const txs = JSON.parse(localStorage.getItem('fd_transactions')||'[]')
+        txs.unshift({ amount: total, type: 'debit', description: 'Pembayaran pesanan - ' + method, ts: orderRecord.ts })
+        localStorage.setItem('fd_transactions', JSON.stringify(txs))
+        localStorage.removeItem('fd_pending_order')
+        localStorage.removeItem('fd_order_id')
+        Cart.clear(); alert('Pembayaran dicatat. Terima kasih!'); window.location='/'
+      })
     })
   }
 })

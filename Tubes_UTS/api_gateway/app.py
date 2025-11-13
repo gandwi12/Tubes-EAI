@@ -2,10 +2,14 @@ import os
 os.environ['FLASK_SKIP_DOTENV'] = '1'
 
 from flask import Flask, render_template, request, jsonify
+import requests
 from datetime import datetime
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config['SECRET_KEY'] = 'dev-secret-key'
+
+ORDER_SERVICE_URL = os.getenv('ORDER_SERVICE_URL', 'http://127.0.0.1:5003')
+PAYMENT_SERVICE_URL = os.getenv('PAYMENT_SERVICE_URL', 'http://127.0.0.1:5004')
 
 # User data storage (in-memory)
 user_storage = {
@@ -44,19 +48,49 @@ def menu():
 def order():
     if request.method == 'POST':
         data = request.get_json() if request.is_json else request.form
-        # Process order (in production, save to database)
-        print(f"Order received: {data}")
-        return jsonify({'status': 'ok', 'message': 'Pesanan berhasil dibuat'}), 200
+        cart = data.get('cart') or data.get('items') or []
+        try:
+            items = [
+                {
+                    'id': int(i.get('id')) if i.get('id') is not None else None,
+                    'name': i.get('name',''),
+                    'qty': int(i.get('qty',1)),
+                    'price': int(float(i.get('price',0)))
+                } for i in cart
+            ]
+        except Exception:
+            items = []
+        total_price = sum([(it['qty'] * it['price']) for it in items])
+        payload = {'items': items, 'total_price': total_price, 'status': 'pending'}
+        try:
+            resp = requests.post(f"{ORDER_SERVICE_URL}/orders", json=payload, timeout=5)
+            return jsonify(resp.json()), resp.status_code
+        except Exception as e:
+            return jsonify({'error':'order service unavailable','detail':str(e)}), 502
     return render_template('order.html')
 
 @app.route('/payment', methods=['GET', 'POST'])
 def payment():
     if request.method == 'POST':
         data = request.get_json() if request.is_json else request.form
-        # Process payment (in production, integrate with payment gateway)
-        print(f"Payment received: {data}")
-        return jsonify({'status': 'ok', 'message': 'Pembayaran berhasil'}), 200
+        try:
+            order_id = int(data.get('order_id', 0))
+            amount = int(float(data.get('amount', 0)))
+        except Exception:
+            return jsonify({'error':'order_id and amount must be integers'}), 400
+        method = data.get('method','cod')
+        status = data.get('status','success')
+        payload = {'order_id': order_id, 'amount': amount, 'method': method, 'status': status}
+        try:
+            resp = requests.post(f"{PAYMENT_SERVICE_URL}/payment", json=payload, timeout=5)
+            return jsonify(resp.json()), resp.status_code
+        except Exception as e:
+            return jsonify({'error':'payment service unavailable','detail':str(e)}), 502
     return render_template('payment.html')
+
+@app.route('/health')
+def health():
+    return jsonify({'status':'ok','service':'gateway','time': datetime.now().isoformat()}), 200
 
 @app.route('/restoran')
 def restoran():
