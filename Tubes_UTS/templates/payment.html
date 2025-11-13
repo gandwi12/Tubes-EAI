@@ -5,7 +5,7 @@
 {% block content %}
   <h2><i class="fas fa-credit-card"></i> Pembayaran</h2>
   
-  <div style="max-width: 500px; margin: 2rem auto;">
+  <div style="max-width: 500px; margin: 0 auto;">
     <div class="card" style="border-top: 4px solid #fa6f3d;">
       <h3 style="color: #fa6f3d; margin-bottom: 1.5rem;">
         <i class="fas fa-calculator"></i> Ringkasan Pembayaran
@@ -13,7 +13,7 @@
       <div style="padding: 1rem 0; border-bottom: 1px solid #f0f0f0;">
         <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
           <span>Subtotal Pesanan:</span>
-          <strong style="color: #fa6f3d;">Rp 0</strong>
+          <strong id="payment-subtotal" style="color: #fa6f3d;">Rp 0</strong>
         </div>
         <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
           <span>Biaya Pengiriman:</span>
@@ -21,7 +21,7 @@
         </div>
         <div style="display: flex; justify-content: space-between; margin-bottom: 0.8rem;">
           <span>Diskon (jika ada):</span>
-          <strong style="color: #52c41a;">- Rp 0</strong>
+          <strong id="payment-discount" style="color: #52c41a;">- Rp 0</strong>
         </div>
       </div>
       <div style="padding: 1rem 0; display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 700;">

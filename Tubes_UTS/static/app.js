@@ -8,6 +8,29 @@ const Cart = {
     this.save()
     this.renderMini()
     this.renderCartList()
+    
+    // Show notification
+    this.showNotification(`${item.name} ditambahkan ke keranjang!`, 'success')
+  },
+  showNotification(message, type = 'info') {
+    // Create notification element
+    const notif = document.createElement('div')
+    notif.className = `notification notification-${type}`
+    notif.innerHTML = `
+      <div class="notification-content">
+        <i class="fas fa-check-circle"></i> ${message}
+      </div>
+    `
+    document.body.appendChild(notif)
+    
+    // Animate in
+    setTimeout(() => notif.classList.add('show'), 10)
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+      notif.classList.remove('show')
+      setTimeout(() => notif.remove(), 300)
+    }, 3000)
   },
   remove(id) {
     this.items = this.items.filter(i => i.id != id)
@@ -49,9 +72,17 @@ const Cart = {
     el.querySelectorAll('.qty-dec').forEach(b=>b.addEventListener('click',e=>{Cart.changeQty(e.target.dataset.id,-1)}))
     el.querySelectorAll('.qty-inc').forEach(b=>b.addEventListener('click',e=>{Cart.changeQty(e.target.dataset.id,1)}))
     el.querySelectorAll('.remove').forEach(b=>b.addEventListener('click',e=>{Cart.remove(e.target.dataset.id)}))
-    // update payment total if present
+    // update payment summary if present (subtotal, delivery, discount, total)
+    const subtotal = this.totalPrice()
+    const subtotalEl = document.getElementById('payment-subtotal')
+    if(subtotalEl) subtotalEl.textContent = 'Rp ' + Number(subtotal).toLocaleString('id-ID')
+
+    const deliveryFee = 10000 // fixed delivery fee in demo
+    const discountEl = document.getElementById('payment-discount')
+    if(discountEl) discountEl.textContent = '- Rp ' + Number(0).toLocaleString('id-ID')
+
     const totalEl = document.getElementById('payment-total')
-    if(totalEl) totalEl.textContent = 'Rp ' + this.totalPrice().toFixed(0)
+    if(totalEl) totalEl.textContent = 'Rp ' + Number(subtotal + deliveryFee).toLocaleString('id-ID')
   }
 }
 
@@ -77,7 +108,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({cart:Cart.items, name: orderForm.name.value, address: orderForm.address.value, note: orderForm.note.value})
       }).then(r=>{
-        if(r.ok){ Cart.clear(); alert('Pesanan dibuat'); window.location='/payment' }
+        if(r.ok){
+          // don't clear cart here — proceed to payment page which reads cart from localStorage
+          alert('Pesanan dibuat');
+          window.location='/payment'
+        }
         else alert('Gagal membuat pesanan')
       }).catch(()=>alert('Gagal menghubungi server'))
     })
