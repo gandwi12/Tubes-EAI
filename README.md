@@ -169,20 +169,55 @@ Edit `static/style.css` untuk customize warna, font, layout, dll.
 Flask app berjalan di debug mode secara default (`debug=True` di `api_gateway/app.py`). Browser akan auto-reload saat ada perubahan di code.
 
 ### Test Endpoints
-Gunakan tools seperti Postman atau curl untuk test API:
-```bash
-# Test POST /order
-curl -X POST http://127.0.0.1:5000/order \
-  -H "Content-Type: application/json" \
-  -d '{"cart":[{"id":1,"name":"Nasi Goreng","price":"25000","qty":2}],"name":"Joni","address":"Jl Merdeka"}'
+Bagian ini menjelaskan cara melakukan pengujian API menggunakan Postman.  
+Semua endpoint dijalankan secara lokal pada URL berikut:
 
-# Test POST /payment
-curl -X POST http://127.0.0.1:5000/payment \
-  -H "Content-Type: application/json" \
-  -d '{"method":"cod"}'
-```
+http://127.0.0.1:5000
 
-## Troubleshooting
+---
+
+### 🧪 Test API: POST /order dan POST /payment
+
+#### 1. POST /order
+**URL:**
+http://127.0.0.1:5000/order
+
+**Method:** POST  
+**Headers:**
+Content-Type: application/json
+
+**Body (raw → JSON):**
+{
+  "cart": [
+    {
+      "id": 1,
+      "name": "Nasi Goreng",
+      "price": "25000",
+      "qty": 2
+    }
+  ],
+  "name": "Joni",
+  "address": "Jl Merdeka"
+}
+
+---
+
+#### 2. POST /payment
+**URL:**
+http://127.0.0.1:5000/payment
+
+**Method:** POST  
+**Headers:**
+Content-Type: application/json
+
+**Body (raw → JSON):**
+{
+  "method": "cod"
+}
+
+---
+
+
 
 ### Port 5000 sudah digunakan
 Ubah port di `api_gateway/app.py`:
