@@ -8,9 +8,14 @@ except Exception:
 
 BASE_DIR = Path(__file__).resolve().parent
 DEFAULT_DB = f"sqlite:///{BASE_DIR / 'database.db'}"
+# SHARED DATABASE (bisa ganti ke MySQL)
+SHARED_DB = "mysql+pymysql://root:@localhost/food_delivery_db"
 
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'payment-dev-key')
+    # Uncomment ini kalau mau pake 1 database MySQL:
+    # SQLALCHEMY_DATABASE_URI = SHARED_DB
+    # Atau pake environment variable:
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', DEFAULT_DB)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     PORT = int(os.getenv('PORT', 5004))

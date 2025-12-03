@@ -14,11 +14,11 @@ CORS(app)
 
 
 def seed_data():
-    # nothing required beyond create_database.py seed, kept for parity
+   
     pass
 
 
-# safe decorator usage; also call manually in __main__
+
 try:
     @app.before_first_request
     def create_tables_and_seed():
@@ -67,23 +67,46 @@ def create_order():
 
 @app.route('/orders/<int:order_id>', methods=['PUT'])
 def update_order(order_id):
-    o = Order.query.get(order_id)
-    if not o:
-        return jsonify({'error': 'Order not found'}), 404
     data = request.get_json() or {}
-    if 'items' in data:
-        if not isinstance(data['items'], list):
-            return jsonify({'error': 'items must be a list'}), 400
-        o.items = json.dumps(data['items'])
-    if 'total_price' in data:
-        try:
-            o.total_price = int(data['total_price'])
-        except Exception:
-            return jsonify({'error': 'total_price must be integer'}), 400
-    if 'status' in data:
-        o.status = data['status']
+
+    item_id = data.get("id")
+    if not item_id:
+        return jsonify({"error": "id item harus dikirim"}), 400
+
+    order = Order.query.get(order_id)
+    if not order:
+        return jsonify({"error": "Order not found"}), 404
+
+    
+    items = json.loads(order.items)
+
+    updated = False
+
+   
+    for item in items:
+        if item["id"] == item_id:
+            if "name" in data:
+                item["name"] = data["name"]
+            if "price" in data:
+                item["price"] = int(data["price"])
+            if "qty" in data:
+                item["qty"] = int(data["qty"])
+            updated = True
+
+    if not updated:
+        return jsonify({"error": "Item dengan id tersebut tidak ditemukan"}), 404
+
+  
+    new_total = sum(i["price"] * i["qty"] for i in items)
+
+    order.items = json.dumps(items)
+    order.total_price = new_total
+
     db.session.commit()
-    return jsonify(o.to_dict())
+
+    return jsonify(order.to_dict()), 200
+
+
 
 
 @app.route('/orders/<int:order_id>', methods=['DELETE'])
